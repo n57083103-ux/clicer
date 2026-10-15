@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON CLICKER</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0b0e19;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin: 20px 0 35px;
+        }
+
+        header h1 {
+            color: #00f5ff;
+            font-size: clamp(28px, 6vw, 44px);
+            text-shadow: 0 0 20px #00f5ff70;
+        }
+
+        header p {
+            color: #9299b5;
+            margin-top: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: #151a2c;
+            border: 1px solid #272e49;
+            border-radius: 15px;
+            padding: 18px 8px;
+            text-align: center;
+        }
+
+        .stat p {
+            color: #9299b5;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .stat h2 {
+            color: #00f5ff;
+            font-size: clamp(17px, 4vw, 25px);
+            overflow-wrap: anywhere;
+        }
+
+        .game {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: #151a2c;
+            border: 1px solid #272e49;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .panel h2 {
+            margin-bottom: 20px;
+        }
+
+        .coin-area {
+            min-height: 290px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .coin {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 5px solid #00f5ff;
+            background: radial-gradient(circle, #263b64, #11172a);
+            box-shadow: 
+                0 0 25px #00f5ff55,
+                inset 0 0 25px #00f5ff25;
+            color: #00f5ff;
+            font-size: 75px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+
+        .coin:hover {
+            box-shadow: 
+                0 0 40px #00f5ff90,
+                inset 0 0 25px #00f5ff45;
+        }
+
+        .coin:active {
+            transform: scale(0.92);
+        }
+
+        .coin:focus-visible,
+        .upgrade button:focus-visible,
+        .reset:focus-visible {
+            outline: 2px solid white;
+            outline-offset: 4px;
+        }
+
+        .click-info {
+            color: #9299b5;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .upgrade {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            text-align: left;
+            background: #0e1323;
+            border: 1px solid #272e49;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .upgrade h3 {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .upgrade p {
+            color: #9299b5;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .upgrade button {
+            border: none;
+            border-radius: 8px;
+            background: #00d9e5;
+            color: #07111c;
+            font-weight: bold;
+            padding: 11px 12px;
+            cursor: pointer;
+            min-width: 95px;
+        }
+
+        .upgrade button:hover:not(:disabled) {
+            background: #70faff;
+        }
+
+        .upgrade button:disabled {
+            background: #30374c;
+            color: #858ba0;
+            cursor: not-allowed;
+        }
+
+        .achievement {
+            margin-top: 20px;
+            padding: 15px;
+            background: #0e1323;
+            border-radius: 12px;
+            color: #9299b5;
+            line-height: 1.7;
+        }
+
+        .achievement strong {
+            color: #00f5ff;
+        }
+
+        .bottom {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .reset {
+            background: transparent;
+            border: 1px solid #ff5470;
+            color: #ff7188;
+            border-radius: 8px;
+            padding: 10px 18px;
+            cursor: pointer;
+        }
+
+        .reset:hover {
+            background: #ff547018;
+        }
+
+        .save-status {
+            color: #9299b5;
+            font-size: 12px;
+            margin-top: 12px;
+        }
+
+        .float-text {
+            position: fixed;
+            pointer-events: none;
+            z-index: 10;
+            color: #00f5ff;
+            font-size: 22px;
+            font-weight: bold;
+            animation: floatUp 0.8s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-80px);
+            }
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 12px;
+            }
+
+            .game {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                padding: 20px 15px;
+            }
+
+            .coin {
+                width: 155px;
+                height: 155px;
+                font-size: 65px;
+            }
+
+            .coin-area {
+                min-height: 240px;
+            }
+
+            .upgrade {
+                padding: 12px 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>NEON CLICKER</h1>
+        <p>Кликай, покупай улучшения и становись богаче!</p>
+    </header>
+
+    <section class="stats">
+        <div class="stat">
+            <p>ТВОИ МОНЕТЫ</p>
+            <h2 id="coins">0</h2>
+        </div>
+
+        <div class="stat">
+            <p>ЗА КЛИК</p>
+            <h2 id="clickPower">1</h2>
+        </div>
+
+        <div class="stat">
+            <p>В СЕКУНДУ</p>
+            <h2 id="autoPower">0</h2>
+        </div>
+    </section>
+
+    <main class="game">
+
+        <section class="panel">
+            <h2>Твоя монета</h2>
+
+            <div class="coin-area">
+                <button
+                    class="coin"
+                    id="coinButton"
+                    aria-label="Нажми, чтобы заработать монеты"
+                >₿</button>
+
+                <p class="click-info">
+                    Нажимай на монету<br>
+                    и собирай богатство!
+                </p>
+            </div>
+
+            <div class="achievement">
+                Уровень: <strong id="level">1</strong><br>
+                Всего заработано: <strong id="totalEarned">0</strong><br>
+                Достижение: <strong id="achievement">Новичок</strong>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Магазин улучшений</h2>
+
+            <div class="upgrade">
+                <div>
+                    <h3>💪 Сильный клик</h3>
+                    <p>+1 монета за клик</p>
+                    <p>Уровень: <span id="clickLevel">0</span></p>
+                </div>
+
+                <button id="buyClick">
+                    <span id="clickCost">25</span> монет
+                </button>
+            </div>
+
+            <div class="upgrade">
+                <div>
+                    <h3>🤖 Автокликер</h3>
+                    <p>+1 монета в секунду</p>
+                    <p>Уровень: <span id="autoLevel">0</span></p>
+                </div>
+                <button id="buyAuto">
+                    <span id="autoCost">50</span> монет
+                </button>
+            </div>
+
+            <div class="upgrade">
+                <div>
+                    <h3>🚀 Мега-клик</h3>
+                    <p>+10 монет за клик</p>
+                    <p>Уровень: <span id="megaLevel">0</span></p>
+                </div>
+
+                <button id="buyMega">
+                    <span id="megaCost">250</span> монет
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="bottom">
+        <button class="reset" id="resetButton">
+            Сбросить прогресс
+        </button>
+
+        <p class="save-status" id="saveStatus">
+            Прогресс сохраняется автоматически
+        </p>
+    </div>
+
+</div>
+
+<script>
+    const SAVE_KEY = "neonClickerSave";
+
+    const defaultState = {
+        coins: 0,
+        clickPower: 1,
+        autoPower: 0,
+        totalEarned: 0,
+        clickLevel: 0,
+        autoLevel: 0,
+        megaLevel: 0,
+        clickCost: 25,
+        autoCost: 50,
+        megaCost: 250
+    };
+
+    let state = { ...defaultState };
+
+    function loadGame() {
+        try {
+            const saved = localStorage.getItem(SAVE_KEY);
+
+            if (!saved) {
+                return;
+            }
+
+            const data = JSON.parse(saved);
+
+            if (!data || typeof data !== "object" || Array.isArray(data)) {
+                return;
+            }
+
+            for (const key of Object.keys(defaultState)) {
+                const value = data[key];
+
+                if (
+                    typeof value === "number" &&
+                    Number.isFinite(value) &&
+                    value >= 0 &&
+                    (key === "coins" ||
+                     key === "totalEarned" ||
+                     Number.isSafeInteger(value))
+                ) {
+                    state[key] = value;
+                }
+            }
+
+            state.clickPower = Math.max(1, state.clickPower);
+            state.clickCost = Math.max(25, state.clickCost);
+            state.autoCost = Math.max(50, state.autoCost);
+            state.megaCost = Math.max(250, state.megaCost);
+
+        } catch (error) {
+            console.error("Не удалось загрузить сохранение:", error);
+            state = { ...defaultState };
+        }
+    }
+
+    function saveGame() {
+        try {
+            localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+
+            document.getElementById("saveStatus").textContent =
+                "Прогресс сохранён";
+        } catch (error) {
+            document.getElementById("saveStatus").textContent =
+                "Не удалось сохранить прогресс";
+        }
+    }
+
+    function formatNumber(number) {
+        return Math.floor(number).toLocaleString("ru-RU");
+    }
+
+    function addCoins(amount) {
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return;
+        }
+
+        const actualAmount = Math.min(
+            amount,
+            Number.MAX_SAFE_INTEGER - state.coins,
+            Number.MAX_SAFE_INTEGER - state.totalEarned
+        );
+
+        if (actualAmount <= 0) {
+            return;
+        }
+
+        state.coins += actualAmount;
+        state.totalEarned += actualAmount;
+
+        updateUI();
+    }
+
+    function showFloatText(x, y, text) {
+        const element = document.createElement("div");
+
+        element.className = "float-text";
+        element.textContent = text;
+        element.style.left = x + "px";
+        element.style.top = y + "px";
+
+        document.body.appendChild(element);
+
+        element.addEventListener("animationend", function () {
+            element.remove();
+        });
+    }
+
+    function getAchievement() {
+        if (state.totalEarned >= 100000) {
+            return "Легенда";
+        }
+
+        if (state.totalEarned >= 10000) {
+            return "Миллионер кликов";
+        }
+
+        if (state.totalEarned >= 1000) {
+            return "Богач";
+        }
+
+        if (state.totalEarned >= 100) {
+            return "Опытный игрок";
+        }
+
+        return "Новичок";
+    }
+
+    function updateUI() {
+        document.getElementById("coins").textContent =
+            formatNumber(state.coins);
+
+        document.getElementById("clickPower").textContent =
+            formatNumber(state.clickPower);
+
+        document.getElementById("autoPower").textContent =
+            formatNumber(state.autoPower);
+
+        document.getElementById("totalEarned").textContent =
+            formatNumber(state.totalEarned);
+
+        document.getElementById("level").textContent =
+            Math.floor(state.totalEarned / 1000) + 1;
+
+        document.getElementById("achievement").textContent =
+            getAchievement();
+
+        document.getElementById("clickLevel").textContent =
+            formatNumber(state.clickLevel);
+
+        document.getElementById("autoLevel").textContent =
+            formatNumber(state.autoLevel);
+
+        document.getElementById("megaLevel").textContent =
+            formatNumber(state.megaLevel);
+
+        document.getElementById("clickCost").textContent =
+            formatNumber(state.clickCost);
+
+        document.getElementById("autoCost").textContent =
+            formatNumber(state.autoCost);
+
+        document.getElementById("megaCost").textContent =
+            formatNumber(state.megaCost);
+
+        document.getElementById("buyClick").disabled =
+            state.coins < state.clickCost;
+
+        document.getElementById("buyAuto").disabled =
+            state.coins < state.autoCost;
+
+        document.getElementById("buyMega").disabled =
+            state.coins < state.megaCost;
+    }
+
+    document.getElementById("coinButton").addEventListener(
+        "click",
+        function (event) {
+            const amount = state.clickPower;
+
+            addCoins(amount);
+
+            showFloatText(
+                event.clientX,
+                event.clientY,
+                "+" + formatNumber(amount)
+            );
+        }
+    );
+
+    document.getElementById("buyClick").addEventListener(
+        "click",
+        function () {
+            if (state.coins < state.clickCost) {
+                return;
+            }
+
+            state.coins -= state.clickCost;
+            state.clickPower += 1;
+            state.clickLevel += 1;
+
+            state.clickCost = Math.min(
+                Number.MAX_SAFE_INTEGER,
+                Math.ceil(state.clickCost * 1.6)
+            );
+
+            updateUI();
+            saveGame();
+        }
+    );
+
+    document.getElementById("buyAuto").addEventListener(
+        "click",
+        function () {
+            if (state.coins < state.autoCost) {
+                return;
+            }
+
+            state.coins -= state.autoCost;
+            state.autoPower += 1;
+            state.autoLevel += 1;
+
+            state.autoCost = Math.min(
+                Number.MAX_SAFE_INTEGER,
+                Math.ceil(state.autoCost * 1.7)
+            );
+
+            updateUI();
+            saveGame();
+        }
+    );
+
+    document.getElementById("buyMega").addEventListener(
+        "click",
+        function () {
+            if (state.coins < state.megaCost) {
+                return;
+            }
+
+            state.coins -= state.megaCost;
+            state.clickPower += 10;
+            state.megaLevel += 1;
+
+            state.megaCost = Math.min(
+                Number.MAX_SAFE_INTEGER,
+                Math.ceil(state.megaCost * 2)
+            );
+
+            updateUI();
+            saveGame();
+        }
+    );
+
+    document.getElementById("resetButton").addEventListener(
+        "click",
+        function () {
+            const confirmed = confirm(
+                "Ты действительно хочешь сбросить весь прогресс?"
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            state = { ...defaultState };
+
+            saveGame();
+            updateUI();
+
+            document.getElementById("saveStatus").textContent =
+                "Прогресс сброшен";
+        }
+    );
+
+    loadGame();
+    updateUI();
+
+    setInterval(function () {
+        if (state.autoPower > 0) {
+            addCoins(state.autoPower);
+        }
+    }, 1000);
+
+    setInterval(saveGame, 5000);
+</script>
+
+</body>
+</html>
